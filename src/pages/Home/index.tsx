@@ -1,7 +1,7 @@
-import { h } from 'preact';
 import { useState } from 'preact/hooks';
 import './style.css';
 import { Button } from '@/components/button/Button';
+import { data } from './data';
 
 export function Home() {
 	const apiUrl = import.meta.env.VITE_API_URL;
@@ -10,6 +10,9 @@ export function Home() {
 	const [font, setfont] = useState('serif');
 	const [word, setWord] = useState('');
 	const [wordMeaning, setWordMeaning] = useState([]);
+
+	const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+	const [isError, setIsError] = useState(false);
 
 	const toggleTheme = () => {
 		setTheme(prevTheme => !prevTheme);
@@ -22,12 +25,23 @@ export function Home() {
 	const fetchData = () => {
 		fetch(`${apiUrl}/${word}`)
 			.then((res) => {
+				if (!res.ok) {
+					if (res.status === 404) {
+						setIsError(!isError);
+						throw new Error('Word not found (404)');
+					}
+					throw new Error(`Error: ${res.status}`);
+				}
 				return res.json();
 			})
 			.then((data) => {
-				console.log(data);
+				setIsError(false);
 				setWordMeaning(data);
 			});
+	};
+
+	const handlePlayAudio = (audio: string) => {
+		setPlayingAudio(audio);
 	};
 
 	return (
@@ -63,7 +77,71 @@ export function Home() {
 				</div>
 
 				<div className='my-4'>
-					<pre>{JSON.stringify(wordMeaning, null, 2)}</pre>
+					{wordMeaning.length > 0 ? (
+						<pre>{JSON.stringify(wordMeaning, null, 2)}</pre>
+					) : (
+						<div>
+							{data.map(item => (
+								<div key={item.word}>
+									<h2>Word: {item.word}</h2>
+									<p>Phonetic: {item.phonetic}</p>
+									<div>
+										<h3>Phonetics:</h3>
+										{item.phonetics.map((phonetic, index) => (
+											phonetic.audio ? (
+												<div key={index}>
+													<p>Text: {phonetic.text}</p>
+													<img
+														src="/icon-play.svg"
+														alt="Play Audio"
+														style={{ cursor: 'pointer' }}
+														onClick={() => handlePlayAudio(phonetic.audio)}
+													/>
+													{playingAudio === phonetic.audio && (
+														<audio controls autoPlay>
+															<source src={phonetic.audio} type="audio/mpeg" />
+															Your browser does not support the audio element.
+														</audio>
+													)}
+												</div>
+											) : null
+										))}
+									</div>
+									<div>
+										<h3>Meanings:</h3>
+										{item.meanings.map((meaning, index) => (
+											<div key={index}>
+												<p>Part of Speech: {meaning.partOfSpeech}</p>
+												{meaning.definitions.map((definition, defIndex) => (
+													<div key={defIndex}>
+														<p>Definition: {definition.definition}</p>
+														{definition.example && <p>Example: {definition.example}</p>}
+													</div>
+												))}
+											</div>
+										))}
+									</div>
+									<div>
+										<h3>License:</h3>
+										<p>
+											<a href={item.license.url} target="_blank" rel="noopener noreferrer">{item.license.name}</a>
+										</p>
+									</div>
+									<div>
+										<h3>Source URLs:</h3>
+										{item.sourceUrls.map((url, index) => (
+											<p key={index}>
+												<a href={url} target="_blank" rel="noopener noreferrer">{url}</a>
+											</p>
+										))}
+									</div>
+								</div>
+							))}
+						</div>
+					)}
+					{isError && (
+						<div>No meaning found!</div>
+					)}
 				</div>
 
 			</div>
