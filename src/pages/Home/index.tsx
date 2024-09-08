@@ -83,57 +83,63 @@ export function Home() {
 						<div>
 							{data.map(item => (
 								<div key={item.word}>
-									<h2>Word: {item.word}</h2>
-									<p>Phonetic: {item.phonetic}</p>
-									<div>
-										<h3>Phonetics:</h3>
-										{item.phonetics.map((phonetic, index) => (
-											phonetic.audio ? (
-												<div key={index}>
-													<p>Text: {phonetic.text}</p>
-													<img
-														src="/icon-play.svg"
-														alt="Play Audio"
-														style={{ cursor: 'pointer' }}
-														onClick={() => handlePlayAudio(phonetic.audio)}
-													/>
-													{playingAudio === phonetic.audio && (
-														<audio controls autoPlay>
-															<source src={phonetic.audio} type="audio/mpeg" />
-															Your browser does not support the audio element.
-														</audio>
-													)}
-												</div>
-											) : null
-										))}
+									<div class='flex flex-row items-center justify-between'>
+										<div class='flex flex-col gap-4 w-auto'>
+											<h2 class='text-5xl font-bold'>{item.word}</h2>
+											<p class='text-[#A345ED] font-normal text-xl'>{item.phonetic}</p>
+										</div>
+										<div>
+											{item.phonetics.map((phonetic, index) => (
+												phonetic.audio ? (
+													<div key={index}>
+														<img
+															src="/icon-play.svg"
+															alt="Play Audio"
+															style={{ cursor: 'pointer' }}
+															onClick={() => handlePlayAudio(phonetic.audio)}
+														/>
+														{playingAudio === phonetic.audio && (
+															<audio class='hidden' controls autoPlay>
+																<source src={phonetic.audio} type="audio/mpeg" />
+																Your browser does not support the audio element.
+															</audio>
+														)}
+													</div>
+												) : null
+											))}
+										</div>
 									</div>
 									<div>
-										<h3>Meanings:</h3>
 										{item.meanings.map((meaning, index) => (
 											<div key={index}>
-												<p>Part of Speech: {meaning.partOfSpeech}</p>
+												<div class='w-full h-auto py-10 flex flex-row items-center gap-4'>
+													<p class='font-bold text-xl'>{meaning.partOfSpeech}</p>
+													<hr class='w-full' />
+												</div>
+												<div class='text-[#676767] mb-4'>Meanings: </div>
 												{meaning.definitions.map((definition, defIndex) => (
 													<div key={defIndex}>
-														<p>Definition: {definition.definition}</p>
+														<p> <span class='text-[#A345ED] px-4'>&#8226;</span> {definition.definition}</p>
 														{definition.example && <p>Example: {definition.example}</p>}
 													</div>
 												))}
 											</div>
 										))}
 									</div>
-									<div>
-										<h3>License:</h3>
-										<p>
-											<a href={item.license.url} target="_blank" rel="noopener noreferrer">{item.license.name}</a>
-										</p>
+
+									<div class='py-10'>
+										<hr />
 									</div>
-									<div>
-										<h3>Source URLs:</h3>
+
+
+									<div class='flex flex-row'>
+										<h3 class='mr-6'>Source</h3>
 										{item.sourceUrls.map((url, index) => (
-											<p key={index}>
+											<p key={index} class='mr-2 underline'>
 												<a href={url} target="_blank" rel="noopener noreferrer">{url}</a>
 											</p>
 										))}
+										<img src="/icon-new-window.svg" alt="new window" class='w-4 h-4' />
 									</div>
 								</div>
 							))}
