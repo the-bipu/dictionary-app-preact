@@ -78,10 +78,8 @@ export function Home() {
 
 				<div className='my-4'>
 					{wordMeaning.length > 0 ? (
-						<pre>{JSON.stringify(wordMeaning, null, 2)}</pre>
-					) : (
 						<div>
-							{data.map(item => (
+							{wordMeaning.map(item => (
 								<div key={item.word}>
 									<div class='flex flex-row items-center justify-between'>
 										<div class='flex flex-col gap-4 w-auto'>
@@ -144,6 +142,8 @@ export function Home() {
 								</div>
 							))}
 						</div>
+					) : (
+						<div>No meaning Found!</div>
 					)}
 					{isError && (
 						<div>No meaning found!</div>
