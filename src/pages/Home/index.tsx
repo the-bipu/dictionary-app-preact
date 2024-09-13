@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import './style.css';
 import { Button } from '@/components/button/Button';
 import { data } from './data';
@@ -44,21 +44,44 @@ export function Home() {
 		setPlayingAudio(audio);
 	};
 
+	useEffect(() => {
+		const createStars = () => {
+			const homescreen = document.querySelector(".homescreen");
+			const totalStars = 100;
+			for (let i = 0; i < totalStars; i++) {
+				const star = document.createElement("div");
+				const size = 2;
+				star.classList.add("star");
+				star.style.width = `${size}px`;
+				star.style.height = `${size}px`;
+				star.style.position = "absolute";
+				star.style.top = `${Math.random() * window.innerHeight}px`;
+				star.style.left = `${Math.random() * window.innerWidth}px`;
+				star.style.borderRadius = "50%";
+				star.style.animation = `twinkle ${Math.random() * 5 + 5}s linear ${Math.random() * 1 + 1}s infinite`;
+
+				homescreen.appendChild(star);
+			}
+		};
+
+		createStars();
+	}, []);
+
 	return (
-		<div class={`flex flex-col items-center w-full min-h-screen py-14 ${theme ? 'bg-black text-white' : 'bg-white text-black'} ${font === 'serif' && 'serif'} ${font === 'sans' && 'sans'} ${font === 'mono' && 'mono'}`}>
+		<div class={`relative flex flex-col items-center w-full min-h-screen py-14 homescreen ${theme ? 'bg-black text-white' : 'bg-white text-black'} ${font === 'serif' && 'serif'} ${font === 'sans' && 'sans'} ${font === 'mono' && 'mono'} overflow-hidden`}>
 			<div class='w-1/2 h-auto flex flex-col items-start justify-start'>
 
 				{/* Navbar is placed here */}
 				<nav class='w-full h-auto flex flex-row justify-between mb-14'>
 
-					<img src='/logo.svg' alt='' class='w-8 h-8' />
+					<img src="/tail.svg" alt="" class='w-12 h-12' />
 
 					<div class='flex flex-row gap-2 items-center justify-center'>
 
-						<select name="font" id="font" class={`${theme ? 'bg-black text-white' : 'bg-white text-black'} outline-none`} onChange={(e: any) => setfont(e.target.value)}>
-							<option value="serif" class='px-3 border-r border-r-[#cfcfcf]'>Serif</option>
-							<option value="sans" class='px-3 border-r border-r-[#cfcfcf]'>Sans Serif</option>
-							<option value="mono" class='px-3 border-r border-r-[#cfcfcf]'>Mono</option>
+						<select name="font" id="font" class={`w-32 border border-[#cfcfcf] rounded-full px-2 py-1 ${theme ? 'bg-black text-white' : 'bg-white text-black'} outline-none`} onChange={(e: any) => setfont(e.target.value)}>
+							<option value="serif" class='px-3'>Serif</option>
+							<option value="sans" class='px-3'>Sans Serif</option>
+							<option value="mono" class='px-3'>Mono</option>
 						</select>
 
 						<Button theme={theme} toggleTheme={toggleTheme} />
@@ -72,6 +95,7 @@ export function Home() {
 					<input
 						type="text"
 						class={`w-full h-16 rounded-2xl ${theme ? 'bg-[#1F1F1F]' : 'bg-[#F4F4F4]'} outline-none indent-6 text-xl font-semibold`} onChange={handleInputChange}
+						placeholder={'Your word here...'}
 					/>
 					<img src="/icon-search.svg" alt="" class='absolute right-6 top-6 cursor-pointer' onClick={fetchData} />
 				</div>
@@ -87,8 +111,10 @@ export function Home() {
 											<p class='text-[#A345ED] font-normal text-xl'>{item.phonetic}</p>
 										</div>
 										<div>
-											{item.phonetics.map((phonetic, index) => (
-												phonetic.audio ? (
+											{item.phonetics.map((phonetic, index) => {
+												if (!phonetic.audio || index > 0) return null;
+
+												return (
 													<div key={index}>
 														<img
 															src="/icon-play.svg"
@@ -97,14 +123,14 @@ export function Home() {
 															onClick={() => handlePlayAudio(phonetic.audio)}
 														/>
 														{playingAudio === phonetic.audio && (
-															<audio class='hidden' controls autoPlay>
+															<audio className='hidden' controls autoPlay>
 																<source src={phonetic.audio} type="audio/mpeg" />
 																Your browser does not support the audio element.
 															</audio>
 														)}
 													</div>
-												) : null
-											))}
+												);
+											})}
 										</div>
 									</div>
 									<div>
@@ -132,8 +158,8 @@ export function Home() {
 
 									<div class='flex flex-row'>
 										<h3 class='mr-6'>Source</h3>
-										{item.sourceUrls.map((url, index) => (
-											<p key={index} class='mr-2 underline'>
+										{item.sourceUrls.slice(0, 1).map((url, index) => (
+											<p key={index} className='mr-2 underline'>
 												<a href={url} target="_blank" rel="noopener noreferrer">{url}</a>
 											</p>
 										))}
@@ -143,12 +169,16 @@ export function Home() {
 							))}
 						</div>
 					) : (
-						<div>No meaning Found!</div>
+						<div>Write your word in the input box.</div>
 					)}
 					{isError && (
 						<div>No meaning found!</div>
 					)}
 				</div>
+
+				{/* <div class='w-auto bottom-4 left-6 absolute'>
+					Made with 💌 by <a href="https://github.com/the-bipu">the-bipu</a>
+				</div> */}
 
 			</div>
 		</div>
